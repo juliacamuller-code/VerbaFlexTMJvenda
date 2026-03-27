@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verba Flex — Frigorífico TMJ</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f4f6f8; font-family: 'Barlow', 'Segoe UI', Arial, sans-serif; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-thumb { background: #D62734; border-radius: 3px; }
+  #root { min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:'Barlow Condensed',sans-serif;font-size:22px;color:#006496">Carregando...</div></div>
+<script type="text/babel" data-presets="react">
+
+// ============================================================
+//  ⚙️  CONFIGURAÇÃO — cole a URL do seu banco Firebase abaixo
+// ============================================================
+const FIREBASE_URL = "https://verba-flex-tmj-default-rtdb.firebaseio.com/";
+// ============================================================
+
+const LOGO = "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";
+
+const DEFAULT_CATALOGO = [
+  { id:1,  nome:"Boné",               valor:25,  isCarne:false },
+  { id:2,  nome:"Camiseta",           valor:45,  isCarne:false },
+  { id:3,  nome:"Banner",             valor:80,  isCarne:false },
+  { id:4,  nome:"Urna",               valor:120, isCarne:false },
+  { id:5,  nome:"Wind Banner",        valor:200, isCarne:false },
+  { id:6,  nome:"Totem",              valor:350, isCarne:false },
+  { id:7,  nome:"Avental",            valor:35,  isCarne:false },
+  { id:99, nome:"Bonificação em Carne", valor:0, isCarne:true  },
+];
+
+const { useState, useEffect } = React;
+
+function fmt(v){ return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(v||0); }
+function fmtDate(s){ return new Date(s).toLocaleDateString("pt-BR"); }
+
+async function fbGet(path){ const r=await fetch(`${FIREBASE_URL}/${path}.json`); return r.json(); }
+async function fbSet(path,data){ await fetch(`${FIREBASE_URL}/${path}.json`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}); }
+
+const FL0 = {vendedorId:"",itemId:"",itemNome:"",isCarne:false,quantidade:1,valor:"",observacao:""};
+
+function App(){
+  const [tab,setTab]               = useState("dashboard");
+  const [vendedores,setVendedores] = useState([]);
+  const [lancamentos,setLancamentos]= useState([]);
+  const [catalogo,setCatalogo]     = useState(DEFAULT_CATALOGO);
+  const [syncing,setSyncing]       = useState(false);
+  const [lastSync,setLastSync]     = useState(null);
+  const [loaded,setLoaded]         = useState(false);
+
+  const [modalV,setModalV]   = useState(false);
+  const [modalL,setModalL]   = useState(false);
+  const [modalH,setModalH]   = useState(null);
+  const [delConf,setDelConf] = useState(null);
+  const [editV,setEditV]     = useState(null);
+  const [editC,setEditC]     = useState(null);
+
+  const [fv,setFv] = useState({nome:"",verba:""});
+  const [fl,setFl] = useState(FL0);
+  const [fc,setFc] = useState({nome:"",valor:"",isCarne:false});
+
+  async function loadData(){
+    try{
+      const d=await fbGet("tmj");
+      if(d){
+        if(d.vendedores)  setVendedores(d.vendedores);
+        if(d.lancamentos) setLancamentos(d.lancamentos);
+        if(d.catalogo)    setCatalogo(d.catalogo);
+        setLastSync(new Date().toLocaleTimeString("pt-BR"));
+      }
+    }catch(e){ console.error(e); }
+    setLoaded(true);
+  }
+
+  async function saveData(v,l,c){
+    setSyncing(true);
+    try{
+      await fbSet("tmj",{vendedores:v,lancamentos:l,catalogo:c});
+      setLastSync(new Date().toLocaleTimeString("pt-BR"));
+    }catch(e){ alert("Erro ao salvar: "+e.message); }
+    setSyncing(false);
+  }
+
+  useEffect(()=>{ loadData(); const t=setInterval(loadData,5000); return ()=>clearInterval(t); },[]);
+
+  function getSaldo(id){
+    const v=vendedores.find(x=>x.id===id); if(!v) return 0;
+    return v.verba - lancamentos.filter(l=>l.vendedorId===id).reduce((a,l)=>a+l.valor*l.quantidade,0);
+  }
+  function getGasto(id){ return lancamentos.filter(l=>l.vendedorId===id).reduce((a,l)=>a+l.valor*l.quantidade,0); }
+  function pct(v,t){ return t>0?Math.min(100,Math.round(v/t*100)):0; }
+
+  function addVendedor(){
+    if(!fv.nome.trim()||!fv.verba) return;
+    let nv;
+    if(editV){ nv=vendedores.map(x=>x.id===editV.id?{...x,nome:fv.nome,verba:parseFloat(fv.verba)}:x); setEditV(null); }
+    else { nv=[...vendedores,{id:Date.now(),nome:fv.nome,verba:parseFloat(fv.verba),createdAt:new Date().toISOString()}]; }
+    setVendedores(nv); saveData(nv,lancamentos,catalogo);
+    setFv({nome:"",verba:""}); setModalV(false);
+  }
+
+  function addLancamento(){
+    if(!fl.vendedorId||(!fl.itemNome&&!fl.itemId)||!fl.valor) return;
+    const nome=fl.itemNome||(catalogo.find(c=>c.id===parseInt(fl.itemId))?.nome||"");
+    const nl=[...lancamentos,{
+      id:Date.now(), vendedorId:parseInt(fl.vendedorId),
+      itemNome:nome, isCarne:fl.isCarne,
+      quantidade:parseInt(fl.quantidade), valor:parseFloat(fl.valor),
+      observacao:fl.observacao.trim(), data:new Date().toISOString()
+    }];
+    setLancamentos(nl); saveData(vendedores,nl,catalogo);
+    setFl(FL0); setModalL(false);
+  }
+
+  function selectCat(itemId){
+    const item=catalogo.find(c=>c.id===parseInt(itemId));
+    if(!item) return;
+    setFl(f=>({...f,
+      itemId:String(item.id),
+      itemNome:item.nome,
+      isCarne:item.isCarne||false,
+      valor:item.isCarne?"":String(item.valor)
+    }));
+  }
+
+  function addCatItem(){
+    if(!fc.nome.trim()) return;
+    if(!fc.isCarne && !fc.valor) return;
+    let nc;
+    if(editC){
+      nc=catalogo.map(x=>x.id===editC.id?{...x,nome:fc.nome,valor:fc.isCarne?0:parseFloat(fc.valor),isCarne:fc.isCarne}:x);
+      setEditC(null);
+    } else {
+      nc=[...catalogo,{id:Date.now(),nome:fc.nome,valor:fc.isCarne?0:parseFloat(fc.valor),isCarne:fc.isCarne||false}];
+    }
+    setCatalogo(nc); saveData(vendedores,lancamentos,nc);
+    setFc({nome:"",valor:"",isCarne:false});
+  }
+
+  function doDelete(){
+    let nv=vendedores,nl=lancamentos,nc=catalogo;
+    if(delConf.type==="vendedor")   nv=vendedores.filter(x=>x.id!==delConf.id);
+    if(delConf.type==="lancamento") nl=lancamentos.filter(x=>x.id!==delConf.id);
+    if(delConf.type==="catalogo")   nc=catalogo.filter(x=>x.id!==delConf.id);
+    setVendedores(nv); setLancamentos(nl); setCatalogo(nc);
+    saveData(nv,nl,nc); setDelConf(null);
+  }
+
+  const totalVerba=vendedores.reduce((a,v)=>a+v.verba,0);
+  const totalGasto=lancamentos.reduce((a,l)=>a+l.valor*l.quantidade,0);
+  const totalCarne=lancamentos.filter(l=>l.isCarne).reduce((a,l)=>a+l.valor*l.quantidade,0);
+
+  const CSS=`
+    .nav-tab{background:none;border:none;cursor:pointer;font-family:'Barlow',sans-serif;font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:8px 18px;color:rgba(255,255,255,.7);border-radius:4px;transition:all .18s;display:flex;align-items:center;gap:7px}
+    .nav-tab:hover{color:#fff;background:rgba(255,255,255,.15)}
+    .nav-tab.active{color:#fff;background:#D62734;box-shadow:0 2px 8px rgba(214,39,52,.5)}
+    .btn{border:none;cursor:pointer;border-radius:5px;font-family:'Barlow',sans-serif;font-weight:700;transition:all .15s;letter-spacing:.04em;text-transform:uppercase}
+    .btn-red{background:#D62734;color:#fff;padding:10px 24px;font-size:13px}
+    .btn-red:hover{background:#b81e29;transform:translateY(-1px);box-shadow:0 4px 12px rgba(214,39,52,.4)}
+    .btn-or{background:transparent;color:#D62734;border:1.5px solid #D62734;padding:7px 16px;font-size:12px;border-radius:5px;cursor:pointer;font-family:'Barlow',sans-serif;font-weight:700;transition:all .15s;text-transform:uppercase}
+    .btn-or:hover{background:rgba(214,39,52,.08)}
+    .btn-ob{background:transparent;color:#006496;border:1.5px solid #006496;padding:7px 16px;font-size:12px;border-radius:5px;cursor:pointer;font-family:'Barlow',sans-serif;font-weight:700;transition:all .15s;text-transform:uppercase}
+    .btn-ob:hover{background:rgba(0,100,150,.08)}
+    .btn-del{background:transparent;border:1.5px solid #D62734;color:#D62734;padding:5px 10px;font-size:11px;border-radius:4px;cursor:pointer;font-family:'Barlow',sans-serif;font-weight:700;transition:all .15s}
+    .btn-del:hover{background:#D62734;color:#fff}
+    .card{background:#fff;border:1px solid #e2e6ea;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    input,select,textarea{background:#fafafa;border:1.5px solid #dde1e5;color:#1a1a1a;border-radius:6px;padding:10px 14px;font-family:'Barlow',sans-serif;font-size:14px;width:100%;outline:none;transition:border .18s}
+    input:focus,select:focus,textarea:focus{border-color:#006496;background:#fff;box-shadow:0 0 0 3px rgba(0,100,150,.1)}
+    input::placeholder,textarea::placeholder{color:#bbb}
+    textarea{resize:vertical;min-height:70px;line-height:1.5}
+    label{font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#666;display:block;margin-bottom:6px}
+    .mb{margin-bottom:16px}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,30,60,.6);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+    .modal{background:#fff;border-radius:12px;padding:32px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.22)}
+    .modal-hdr{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #D62734}
+    .modal-ttl{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;text-transform:uppercase;color:#006496}
+    .sec-ttl{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;text-transform:uppercase;color:#006496}
+    .sec-line{width:52px;height:4px;background:#D62734;border-radius:2px;margin:6px 0 22px}
+    .v-card{background:#fff;border:1px solid #e2e6ea;border-left:5px solid #006496;border-radius:10px;padding:20px 22px;transition:all .18s;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+    .v-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.1);transform:translateY(-2px)}
+    .v-card.danger{border-left-color:#D62734}
+    .saldo-v{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;line-height:1}
+    .badge-ok{background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;white-space:nowrap}
+    .badge-warn{background:#ffebee;color:#c62828;border:1px solid #ffcdd2;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;white-space:nowrap}
+    .badge-carne{background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;white-space:nowrap}
+    .stat-card{background:#fff;border-radius:10px;padding:20px 24px;border:1px solid #e2e6ea;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .stat-lbl{font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:6px}
+    .stat-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800}
+    .pbar{background:#e8edf0;border-radius:6px;height:8px;overflow:hidden}
+    .pfill{height:100%;border-radius:6px;transition:width .5s ease}
+    .l-row{background:#fff;border:1px solid #e8ecef;border-radius:9px;padding:14px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;transition:box-shadow .15s}
+    .l-row:hover{box-shadow:0 3px 12px rgba(0,0,0,.09)}
+    .l-row.carne{border-left:4px solid #ff8f00;background:#fffbf5}
+    .c-row{background:#fff;border:1px solid #e8ecef;border-radius:9px;padding:13px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+    .c-row:hover{box-shadow:0 3px 12px rgba(0,0,0,.09)}
+    .c-row.carne-item{border-left:4px solid #ff8f00;background:#fffbf5}
+    .price-tag{background:#e3f2fd;color:#006496;border:1.5px solid #90caf9;border-radius:5px;padding:4px 12px;font-size:13px;font-weight:800;font-family:'Barlow Condensed',sans-serif;white-space:nowrap}
+    .price-tag-carne{background:#fff3e0;color:#e65100;border:1.5px solid #ffcc80;border-radius:5px;padding:4px 12px;font-size:11px;font-weight:700;font-family:'Barlow',sans-serif;white-space:nowrap}
+    .h-row{border-bottom:1px solid #f0f0f0;padding:11px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+    .h-row:last-child{border-bottom:none}
+    .h-row.carne{background:#fffbf5;border-radius:6px;padding:11px 8px;margin-bottom:4px}
+    .obs-box{background:#f8f9fa;border:1px solid #e8ecef;border-radius:5px;padding:6px 10px;font-size:11px;color:#666;font-style:italic;margin-top:4px;line-height:1.4}
+    .tot-prev{background:linear-gradient(135deg,#fff3e0,#ffe0b2);border:1.5px solid #ffb74d;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:#e65100}
+    .carne-alert{background:linear-gradient(135deg,#fff3e0,#fff8f0);border:1.5px solid #ffb74d;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-family:'Barlow',sans-serif;font-size:13px;color:#e65100;display:flex;align-items:center;gap:8px}
+    .empty{text-align:center;padding:60px 0;color:#bbb}
+    .sync-bar{background:#e3f2fd;border-bottom:1px solid #bbdefb;padding:6px 28px;font-family:'Barlow',sans-serif;font-size:11px;color:#006496;display:flex;align-items:center;gap:8px}
+    .toggle-wrap{display:flex;align-items:center;gap:10px;background:#f8f9fa;border:1.5px solid #dde1e5;border-radius:6px;padding:10px 14px;cursor:pointer;transition:all .18s}
+    .toggle-wrap:hover{border-color:#006496}
+    .toggle-wrap.active-carne{background:#fff3e0;border-color:#ffb74d}
+    .toggle-check{width:18px;height:18px;border:2px solid #dde1e5;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+    .toggle-check.checked{background:#D62734;border-color:#D62734}
+    @media(max-width:640px){.nav-lab{display:none}}
+  `;
+
+  if(!loaded) return <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",fontFamily:"'Barlow Condensed',sans-serif",fontSize:22,color:"#006496"}}>Carregando dados...</div>;
+
+  return (
+    <div style={{minHeight:"100vh",background:"#f4f6f8"}}>
+      <style>{CSS}</style>
+
+      {/* HEADER */}
+      <div style={{background:"linear-gradient(90deg,#004f78,#006496,#007ab8)",boxShadow:"0 3px 16px rgba(0,0,0,.2)",position:"relative"}}>
+        <div style={{position:"absolute",top:0,left:0,right:0,height:5,background:"#D62734"}}/>
+        <div style={{maxWidth:1200,margin:"0 auto",padding:"0 28px",display:"flex",alignItems:"center",justifyContent:"space-between",height:72}}>
+          <div style={{display:"flex",alignItems:"center",gap:16}}>
+            <div style={{background:"#fff",borderRadius:9,padding:"5px 10px",height:52,width:90,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(0,0,0,.15)"}}>
+              <img src={"data:image/png;base64,"+LOGO} alt="TMJ" style={{height:42,width:"auto",objectFit:"contain"}}/>
+            </div>
+            <div style={{borderLeft:"2px solid rgba(255,255,255,.25)",paddingLeft:16}}>
+              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:22,color:"#fff",textTransform:"uppercase",letterSpacing:".08em",lineHeight:1}}>Verba Flex</div>
+              <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:"rgba(255,255,255,.6)",letterSpacing:".1em",textTransform:"uppercase",marginTop:2}}>Controle Interno · Frigorífico TMJ</div>
+            </div>
+          </div>
+          <nav style={{display:"flex",gap:4}}>
+            {[{id:"dashboard",label:"Dashboard",icon:"⊞"},{id:"vendedores",label:"Vendedores",icon:"◈"},{id:"lancamentos",label:"Lançamentos",icon:"◎"},{id:"catalogo",label:"Catálogo",icon:"◇"}].map(t=>(
+              <button key={t.id} className={"nav-tab"+(tab===t.id?" active":"")} onClick={()=>setTab(t.id)}>
+                <span>{t.icon}</span><span className="nav-lab">{t.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* SYNC BAR */}
+      <div className="sync-bar">
+        {syncing?<span>⟳ Salvando...</span>:<span>✓ Sincronizado{lastSync?" às "+lastSync:""} · Atualiza automaticamente a cada 5s</span>}
+      </div>
+
+      <div style={{maxWidth:1200,margin:"0 auto",padding:"32px 28px"}}>
+
+        {/* ── DASHBOARD ── */}
+        {tab==="dashboard" && (
+          <div>
+            <div className="sec-ttl">Painel de Controle</div>
+            <div className="sec-line"/>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:32}}>
+              {[
+                {label:"Total de Verba",   value:fmt(totalVerba),          color:"#006496", accent:"#e3f2fd", icon:"💰"},
+                {label:"Total Gasto",      value:fmt(totalGasto),          color:"#D62734", accent:"#ffebee", icon:"🧾"},
+                {label:"Bonif. em Carne",  value:fmt(totalCarne),          color:"#e65100", accent:"#fff3e0", icon:"🥩"},
+                {label:"Saldo Disponível", value:fmt(totalVerba-totalGasto), color:totalVerba-totalGasto<0?"#D62734":"#2e7d32", accent:totalVerba-totalGasto<0?"#ffebee":"#e8f5e9", icon:"✅"},
+              ].map(s=>(
+                <div key={s.label} className="stat-card" style={{borderTop:"4px solid "+s.color}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                    <div><div className="stat-lbl">{s.label}</div><div className="stat-val" style={{color:s.color}}>{s.value}</div></div>
+                    <div style={{width:44,height:44,background:s.accent,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>{s.icon}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {vendedores.length===0 ? (
+              <div className="empty"><div style={{fontSize:56,marginBottom:16,opacity:.4}}>◈</div><div style={{fontSize:14,marginBottom:20}}>Nenhum vendedor cadastrado ainda.</div><button className="btn btn-red" onClick={()=>setTab("vendedores")}>Cadastrar Vendedores</button></div>
+            ) : (
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:16}}>
+                {vendedores.map(vend=>{
+                  const saldo=getSaldo(vend.id), gasto=getGasto(vend.id);
+                  const pctG=pct(gasto,vend.verba), danger=saldo<0;
+                  const carnVend=lancamentos.filter(l=>l.vendedorId===vend.id&&l.isCarne).reduce((a,l)=>a+l.valor*l.quantidade,0);
+                  return (
+                    <div key={vend.id} className={"v-card"+(danger?" danger":"")}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+                        <div>
+                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:21,textTransform:"uppercase"}}>{vend.nome}</div>
+                          <div style={{fontSize:11,color:"#999",marginTop:1}}>Verba: {fmt(vend.verba)}</div>
+                        </div>
+                        <span className={danger?"badge-warn":"badge-ok"}>{danger?"⚠ Estourado":"● Ativo"}</span>
+                      </div>
+                      <div style={{background:danger?"#fff5f5":"#f0f7ff",border:"1.5px solid "+(danger?"#ffcdd2":"#bbdefb"),borderRadius:9,padding:"14px 16px",marginBottom:10,textAlign:"center"}}>
+                        <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:".14em",color:"#999",marginBottom:4}}>Saldo Disponível</div>
+                        <div className="saldo-v" style={{color:danger?"#D62734":"#006496"}}>{fmt(saldo)}</div>
+                      </div>
+                      {carnVend>0&&<div style={{background:"#fff8f0",border:"1px solid #ffcc80",borderRadius:7,padding:"6px 12px",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                        <span style={{fontSize:11,color:"#888"}}>🥩 Bonif. Carne</span>
+                        <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:15,color:"#e65100"}}>{fmt(carnVend)}</span>
+                      </div>}
+                      <div className="pbar" style={{marginBottom:6}}>
+                        <div className="pfill" style={{width:pctG+"%",background:pctG>=90?"#D62734":pctG>=70?"#f57c00":"#006496"}}/>
+                      </div>
+                      <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#999"}}>
+                        <span>Gasto: {fmt(gasto)}</span>
+                        <span style={{fontWeight:700,color:pctG>=90?"#D62734":pctG>=70?"#e65100":"#555"}}>{pctG}%</span>
+                      </div>
+                      <button className="btn-ob" style={{marginTop:14,width:"100%",fontSize:11}} onClick={()=>setModalH(vend)}>
+                        Ver Histórico ({lancamentos.filter(l=>l.vendedorId===vend.id).length} lançamentos)
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── VENDEDORES ── */}
+        {tab==="vendedores" && (
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <div><div className="sec-ttl">Vendedores</div><div className="sec-line"/></div>
+              <button className="btn btn-red" style={{marginTop:6}} onClick={()=>{setEditV(null);setFv({nome:"",verba:""});setModalV(true);}}>+ Novo Vendedor</button>
+            </div>
+            {vendedores.length===0 ? <div className="empty"><div style={{fontSize:56,marginBottom:16,opacity:.4}}>◈</div><div style={{fontSize:14}}>Nenhum vendedor cadastrado.</div></div> : (
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:14}}>
+                {vendedores.map(vend=>{
+                  const saldo=getSaldo(vend.id), gasto=getGasto(vend.id);
+                  return (
+                    <div key={vend.id} className="card" style={{padding:"20px 22px",borderLeft:"5px solid "+(saldo<0?"#D62734":"#006496")}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+                        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:22,textTransform:"uppercase"}}>{vend.nome}</div>
+                        <div style={{display:"flex",gap:8}}>
+                          <button className="btn-ob" style={{padding:"5px 12px",fontSize:11}} onClick={()=>{setEditV(vend);setFv({nome:vend.nome,verba:String(vend.verba)});setModalV(true);}}>✏ Editar</button>
+                          <button className="btn-del" onClick={()=>setDelConf({type:"vendedor",id:vend.id,label:vend.nome})}>✕</button>
+                        </div>
+                      </div>
+                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+                        {[{l:"Total",v:fmt(vend.verba),c:"#006496",bg:"#e3f2fd"},{l:"Gasto",v:fmt(gasto),c:"#D62734",bg:"#ffebee"},{l:"Saldo",v:fmt(saldo),c:saldo<0?"#D62734":"#2e7d32",bg:saldo<0?"#ffebee":"#e8f5e9"}].map(s=>(
+                          <div key={s.l} style={{background:s.bg,borderRadius:7,padding:"10px 12px",textAlign:"center"}}>
+                            <div style={{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".12em",color:"#888",marginBottom:4}}>{s.l}</div>
+                            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:800,color:s.c}}>{s.v}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── LANCAMENTOS ── */}
+        {tab==="lancamentos" && (
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <div><div className="sec-ttl">Lançamentos</div><div className="sec-line"/></div>
+              <button className="btn btn-red" style={{marginTop:6}} onClick={()=>{setFl(FL0);setModalL(true);}}>+ Novo Lançamento</button>
+            </div>
+            {lancamentos.length===0 ? <div className="empty"><div style={{fontSize:56,marginBottom:16,opacity:.4}}>◎</div><div style={{fontSize:14}}>Nenhum lançamento registrado.</div></div> : (
+              <div>
+                {[...lancamentos].reverse().map(lanc=>{
+                  const vend=vendedores.find(v=>v.id===lanc.vendedorId);
+                  return (
+                    <div key={lanc.id} className={"l-row"+(lanc.isCarne?" carne":"")}>
+                      <div style={{width:42,height:42,background:lanc.isCarne?"#fff3e0":"#ffebee",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
+                        {lanc.isCarne?"🥩":"🧾"}
+                      </div>
+                      <div style={{flex:1}}>
+                        <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:17,textTransform:"uppercase",color:"#006496"}}>{vend?.nome||"—"}</div>
+                          {lanc.isCarne&&<span className="badge-carne">🥩 Bonif. Carne</span>}
+                        </div>
+                        <div style={{fontSize:12,color:"#999",marginTop:2}}>{lanc.itemNome} · {lanc.quantidade}x · {fmtDate(lanc.data)}</div>
+                        {lanc.observacao&&<div className="obs-box">📝 {lanc.observacao}</div>}
+                      </div>
+                      <div style={{textAlign:"right",flexShrink:0}}>
+                        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:21,fontWeight:800,color:lanc.isCarne?"#e65100":"#D62734"}}>− {fmt(lanc.valor*lanc.quantidade)}</div>
+                        <div style={{fontSize:11,color:"#bbb"}}>{fmt(lanc.valor)}/un</div>
+                      </div>
+                      <button className="btn-del" style={{flexShrink:0}} onClick={()=>setDelConf({type:"lancamento",id:lanc.id,label:(vend?.nome||"")+" – "+lanc.itemNome})}>✕</button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── CATALOGO ── */}
+        {tab==="catalogo" && (
+          <div>
+            <div className="sec-ttl">Catálogo de Itens</div><div className="sec-line"/>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:28}}>
+              <div>
+                <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:".1em",color:"#888",marginBottom:14}}>Itens disponíveis ({catalogo.length})</div>
+                {catalogo.map(item=>(
+                  <div key={item.id} className={"c-row"+(item.isCarne?" carne-item":"")}>
+                    <div style={{width:38,height:38,background:item.isCarne?"#fff3e0":"#e3f2fd",borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>
+                      {item.isCarne?"🥩":"🏷️"}
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:17,textTransform:"uppercase"}}>{item.nome}</div>
+                      {item.isCarne&&<div style={{fontSize:10,color:"#e65100",marginTop:1}}>valor variável por lançamento</div>}
+                    </div>
+                    {item.isCarne
+                      ? <span className="price-tag-carne">Variável</span>
+                      : <span className="price-tag">{fmt(item.valor)}</span>
+                    }
+                    <div style={{display:"flex",gap:6}}>
+                      <button className="btn-ob" style={{padding:"4px 10px",fontSize:11}} onClick={()=>{setEditC(item);setFc({nome:item.nome,valor:item.isCarne?"":String(item.valor),isCarne:item.isCarne||false});}}>✏</button>
+                      <button className="btn-del" onClick={()=>setDelConf({type:"catalogo",id:item.id,label:item.nome})}>✕</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:".1em",color:"#888",marginBottom:14}}>{editC?"✏ Editar Item":"＋ Adicionar Item"}</div>
+                <div className="card" style={{padding:24}}>
+                  <div className="mb"><label>Nome do Item</label><input placeholder="Ex: Boné, Camiseta, Banner..." value={fc.nome} onChange={e=>setFc(f=>({...f,nome:e.target.value}))}/></div>
+
+                  {/* Toggle carne */}
+                  <div className="mb">
+                    <label>Tipo de item</label>
+                    <div className={"toggle-wrap"+(fc.isCarne?" active-carne":"")} onClick={()=>setFc(f=>({...f,isCarne:!f.isCarne,valor:""}))}>
+                      <div className={"toggle-check"+(fc.isCarne?" checked":"")}>
+                        {fc.isCarne&&<span style={{color:"#fff",fontSize:12,fontWeight:900}}>✓</span>}
+                      </div>
+                      <div>
+                        <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,fontWeight:600,color:fc.isCarne?"#e65100":"#333"}}>
+                          {fc.isCarne?"🥩 Bonificação em Carne (valor variável)":"Item com valor fixo"}
+                        </div>
+                        <div style={{fontSize:11,color:"#999",marginTop:1}}>
+                          {fc.isCarne?"O valor será informado a cada lançamento":"Clique para marcar como bonificação em carne"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {!fc.isCarne&&<div className="mb"><label>Valor Unitário (R$)</label><input type="number" step="0.01" placeholder="0,00" value={fc.valor} onChange={e=>setFc(f=>({...f,valor:e.target.value}))}/></div>}
+
+                  <div style={{display:"flex",gap:10}}>
+                    <button className="btn btn-red" style={{flex:1}} onClick={addCatItem}>{editC?"Salvar":"Adicionar"}</button>
+                    {editC&&<button className="btn-or" onClick={()=>{setEditC(null);setFc({nome:"",valor:"",isCarne:false});}}>Cancelar</button>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── MODAL Vendedor ── */}
+      {modalV&&(
+        <div className="modal-backdrop" onClick={()=>setModalV(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div style={{width:40,height:40,background:"#e3f2fd",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>◈</div>
+              <div className="modal-ttl">{editV?"Editar Vendedor":"Novo Vendedor"}</div>
+            </div>
+            <div className="mb"><label>Nome do Vendedor</label><input placeholder="Nome completo" value={fv.nome} onChange={e=>setFv(f=>({...f,nome:e.target.value}))}/></div>
+            <div className="mb"><label>Verba Flex Total (R$)</label><input type="number" step="0.01" placeholder="0,00" value={fv.verba} onChange={e=>setFv(f=>({...f,verba:e.target.value}))}/></div>
+            <div style={{display:"flex",gap:10,marginTop:8}}>
+              <button className="btn btn-red" style={{flex:1}} onClick={addVendedor}>{editV?"Salvar":"Cadastrar"}</button>
+              <button className="btn-or" onClick={()=>setModalV(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL Lançamento ── */}
+      {modalL&&(
+        <div className="modal-backdrop" onClick={()=>setModalL(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div style={{width:40,height:40,background:fl.isCarne?"#fff3e0":"#ffebee",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>
+                {fl.isCarne?"🥩":"🧾"}
+              </div>
+              <div className="modal-ttl">Novo Lançamento</div>
+            </div>
+
+            <div className="mb"><label>Vendedor</label>
+              <select value={fl.vendedorId} onChange={e=>setFl(f=>({...f,vendedorId:e.target.value}))}>
+                <option value="">Selecione o vendedor...</option>
+                {vendedores.map(v=><option key={v.id} value={v.id}>{v.nome} — Saldo: {fmt(getSaldo(v.id))}</option>)}
+              </select>
+            </div>
+
+            <div className="mb"><label>Selecionar do Catálogo</label>
+              <select value={fl.itemId} onChange={e=>selectCat(e.target.value)}>
+                <option value="">Escolher do catálogo...</option>
+                {catalogo.filter(c=>!c.isCarne).map(c=><option key={c.id} value={c.id}>{c.nome} — {fmt(c.valor)}</option>)}
+                <option disabled>──────────────</option>
+                {catalogo.filter(c=>c.isCarne).map(c=><option key={c.id} value={c.id}>🥩 {c.nome} (valor variável)</option>)}
+              </select>
+            </div>
+
+            {fl.isCarne&&(
+              <div className="carne-alert">
+                🥩 <span><strong>Bonificação em Carne</strong> — o valor é variável, informe o valor real desta bonificação abaixo.</span>
+              </div>
+            )}
+
+            <div className="mb"><label>Nome do Produto</label>
+              <input placeholder="Ou digite o nome manualmente" value={fl.itemNome} onChange={e=>setFl(f=>({...f,itemNome:e.target.value,itemId:""}))}/>
+            </div>
+
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="mb">
+              <div><label>Quantidade</label><input type="number" min="1" value={fl.quantidade} onChange={e=>setFl(f=>({...f,quantidade:e.target.value}))}/></div>
+              <div>
+                <label>{fl.isCarne?"Valor Total (R$) *":"Valor Unitário (R$)"}</label>
+                <input type="number" step="0.01" placeholder={fl.isCarne?"Informe o valor da carne...":"0,00"} value={fl.valor} onChange={e=>setFl(f=>({...f,valor:e.target.value}))} style={fl.isCarne?{borderColor:"#ffb74d",background:"#fffbf5"}:{}}/>
+              </div>
+            </div>
+
+            {/* OBSERVAÇÃO */}
+            <div className="mb">
+              <label>Observação</label>
+              <textarea
+                placeholder="Ex: Bonificação para ação de marketing no Supermercado X — Churrasquinho do Dia das Mães..."
+                value={fl.observacao}
+                onChange={e=>setFl(f=>({...f,observacao:e.target.value}))}
+              />
+            </div>
+
+            {fl.valor&&fl.quantidade&&(
+              <div className="tot-prev">{fl.isCarne?"🥩 ":""}Total a descontar: {fmt(parseFloat(fl.valor||0)*parseInt(fl.quantidade||1))}</div>
+            )}
+
+            <div style={{display:"flex",gap:10}}>
+              <button className="btn btn-red" style={{flex:1}} onClick={addLancamento}>Registrar Lançamento</button>
+              <button className="btn-or" onClick={()=>setModalL(false)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL Histórico ── */}
+      {modalH&&(
+        <div className="modal-backdrop" onClick={()=>setModalH(null)}>
+          <div className="modal" style={{maxWidth:580}} onClick={e=>e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div style={{width:40,height:40,background:"#e3f2fd",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>◈</div>
+              <div>
+                <div className="modal-ttl">{modalH.nome}</div>
+                <div style={{fontSize:11,color:"#888",textTransform:"uppercase",letterSpacing:".08em"}}>Histórico de Retiradas</div>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:18}}>
+              {[
+                {l:"Verba",  v:fmt(modalH.verba),                          c:"#006496",bg:"#e3f2fd"},
+                {l:"Gasto",  v:fmt(getGasto(modalH.id)),                   c:"#D62734",bg:"#ffebee"},
+                {l:"Carne",  v:fmt(lancamentos.filter(l=>l.vendedorId===modalH.id&&l.isCarne).reduce((a,l)=>a+l.valor*l.quantidade,0)), c:"#e65100",bg:"#fff3e0"},
+                {l:"Saldo",  v:fmt(getSaldo(modalH.id)),                   c:getSaldo(modalH.id)<0?"#D62734":"#2e7d32",bg:getSaldo(modalH.id)<0?"#ffebee":"#e8f5e9"},
+              ].map(s=>(
+                <div key={s.l} style={{background:s.bg,borderRadius:8,padding:"10px 12px",textAlign:"center"}}>
+                  <div style={{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".12em",color:"#888",marginBottom:3}}>{s.l}</div>
+                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:17,fontWeight:800,color:s.c}}>{s.v}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{height:1,background:"#eee",margin:"0 0 12px"}}/>
+            <div style={{maxHeight:340,overflowY:"auto"}}>
+              {lancamentos.filter(l=>l.vendedorId===modalH.id).length===0
+                ? <div style={{color:"#bbb",fontSize:13,padding:"24px 0",textAlign:"center"}}>Nenhum lançamento.</div>
+                : [...lancamentos].filter(l=>l.vendedorId===modalH.id).reverse().map(lanc=>(
+                  <div key={lanc.id} className={"h-row"+(lanc.isCarne?" carne":"")}>
+                    <div style={{fontSize:18,flexShrink:0}}>{lanc.isCarne?"🥩":"🧾"}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:16,textTransform:"uppercase"}}>{lanc.itemNome}</div>
+                      <div style={{fontSize:11,color:"#999"}}>{fmtDate(lanc.data)} · {lanc.quantidade}x · {fmt(lanc.valor)}/un</div>
+                      {lanc.observacao&&<div className="obs-box">📝 {lanc.observacao}</div>}
+                    </div>
+                    <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:18,color:lanc.isCarne?"#e65100":"#D62734",flexShrink:0}}>− {fmt(lanc.valor*lanc.quantidade)}</div>
+                  </div>
+                ))
+              }
+            </div>
+            <button className="btn-ob" style={{marginTop:20,width:"100%"}} onClick={()=>setModalH(null)}>Fechar</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL Confirmação ── */}
+      {delConf&&(
+        <div className="modal-backdrop" onClick={()=>setDelConf(null)}>
+          <div className="modal" style={{maxWidth:400}} onClick={e=>e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div style={{width:40,height:40,background:"#ffebee",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>⚠️</div>
+              <div className="modal-ttl" style={{color:"#D62734"}}>Confirmar Exclusão</div>
+            </div>
+            <p style={{fontSize:14,color:"#555",marginBottom:24,lineHeight:1.6}}>
+              Excluir <strong style={{color:"#1a1a1a"}}>{delConf.label}</strong>?
+              {delConf.type==="vendedor"&&<><br/><span style={{color:"#D62734",fontSize:12}}>Os lançamentos serão mantidos.</span></>}
+            </p>
+            <div style={{display:"flex",gap:10}}>
+              <button className="btn btn-red" style={{flex:1}} onClick={doDelete}>Sim, Excluir</button>
+              <button className="btn-or" style={{flex:1}} onClick={()=>setDelConf(null)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
